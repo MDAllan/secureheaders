@@ -27,9 +27,27 @@ app.use(helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' }  // Secure referrer policy
 }));
 
+// Caching strategy for specific routes
+app.use((req, res, next) => {
+  // Cache control for static content
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
+  next();
+});
+
 // Route to confirm server is working
 app.get('/', (req, res) => {
   res.send('Secure HTTPS server is running!');
+});
+
+// Example route with specific caching strategy
+app.get('/posts', (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=600, stale-while-revalidate=120');
+  res.json({ message: 'Posts route with caching' });
+});
+
+app.get('/posts/:id', (req, res) => {
+  res.setHeader('Cache-Control', 'private, max-age=300, stale-while-revalidate=60');
+  res.json({ message: 'Single post route with caching' });
 });
 
 // Start the HTTPS server
@@ -37,7 +55,7 @@ https.createServer(options, app).listen(3000, () => {
   console.log('HTTPS server running on port 3000');
 });
 
-//Error Handling Middleware
+// Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
