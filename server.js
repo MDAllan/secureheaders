@@ -6,8 +6,8 @@ const app = express();
 
 // Configure SSL Certificates using a self-signed certificate using OpenSSL
 const options = {
-  key: fs.readFileSync('path/to/private.key'),
-  cert: fs.readFileSync('path/to/certificate.crt')
+  key: fs.readFileSync('certs/private.key'),
+  cert: fs.readFileSync('certs/certificate.crt')
 };
 
 // SSL Certificates are self-signed for development purposes. for production use certificates from a trusted authority.  
