@@ -1,24 +1,28 @@
 Reflection 
 
 Which SSL setup method did you choose and why? Document your decision-making process in a short paragraph, highlighting any past experiences or expectations about each method.
-We chose to use OpenSSL for generating self-signed certificates since it was suitable for local development and testing. For production, I would recommend using Let's Encrypt or a similar service to avoid security warnings and to ensure that the certificate is trustworthy. SSL certificates are crucial for encrypting data transmitted between the client and server, preventing potential interception of sensitive information. They also contribute to improved SEO rankings by enabling HTTPS.
+We used OpenSSL to generate self-signed certificates because it suited our use during testing and development locally. At production level, I would recommend Let's Encrypt or something of its nature in order to avoid security messages and ensure the certificate is genuine. SSL certificates help secure information passing between the client and server so that interception of sensitive data may not be possible. SSL certificates also contribute towards better search engine optimization ranks because they support HTTPS.
 
 
 How do the headers you chose to implement enhance your app’s security? Document your rationale.
-(Helmet): By using Helmet, we applied some important security headers to enhance the server's security. The headers we configured are:
-Content Security Policy (CSP): Protects against XSS attacks by specifying which content is allowed to be loaded. X-Frame-Options: Prevents clickjacking by restricting how the site can be embedded in frames.
-Strict-Transport-Security (HSTS): Ensures only secure HTTPS connections are used. Additionally, I leveraged other headers like hidePoweredBy, noSniff, xssFilter, and referrerPolicy to further enhance security.
+(Helmet): By using Helmet, we added some essential security headers to the server to make it more secure. The headers that we include are:
+Content Security Policy (CSP): Protects against XSS attacks by specifying what content is allowed to be loaded. X-Frame-Options: Protects against clickjacking by restricting how the site may be framed.
+Strict-Transport-Security (HSTS): Ensures that only secure HTTPS connections are established. I also employed other headers like hidePoweredBy, noSniff, xssFilter, and referrerPolicy to ensure the security was even tighter.
 
 
 What was the most challenging part of setting up HTTPS and Helmet? Document how you resolved any issues.
-One of the most difficult challenges throughout this project was configuring the SSL certificates correctly and ensuring they were recognized by the server. Initially, there were issues with the file path to the private key and certificate, causing the server to fail on startup. Debugging this required verifying the correct file locations and adjusting the paths accordingly. Additionally, browser security warnings appeared due to the use of a self-signed certificate, which was expected but still required manually accepting the certificate in the browser. For Helmet, fine-tuning the Content Security Policy (CSP) was challenging, as blocking inline scripts entirely broke some functionalities. To resolve this, we allowed 'unsafe-inline' for scripts while considering a stricter approach for production.
+Getting the SSL certificates configured correctly and being read by the server was one of the most challenging hurdles throughout this project. First, the path to the certificate and private key file was a problem, and this caused the server not to function at start-up. To debug this entailed verifying correct placement of files and adjusting paths accordingly. Also, browser warnings of security risk followed as an aftermath of being run with a self-signed certificate, which was expected but did require manually approving the certificate via the browser. For Helmet, it was tricky to tune Content Security Policy (CSP) because blocking inline scripts entirely resulted in some of the features breaking. To remedy this, we allowed 'unsafe-inline' for scripts with the intention of moving to stricter in production.
 
 
 Document your caching strategy choices and how they address performance and security needs. What trade-offs did you make?
-We implemented Cache-Control headers to improve performance while maintaining security:
-Public caching for the /posts route ensures that non-sensitive data can be cached for faster access and shared among users, but only for a limited time. 
-Private caching for individual posts (/posts/:id) ensures that sensitive information isn't shared across users or cached inappropriately. This caching strategy helps reduce load times and improve user experience, while keeping sensitive data secure.
-This code sets up a secure HTTPS server with SSL, security headers, caching, and error handling. First, it configures SSL certificates using a self-signed certificate for development, ensuring secure communication. Next, it implements security headers using the Helmet middleware, enforcing policies like Content Security Policy (CSP) to prevent XSS, disabling content embedding to prevent clickjacking, and hiding server details. A caching strategy is applied to specific routes, improving performance by storing responses for a set duration while allowing revalidation. The server defines a root route to confirm it is running securely and includes caching for routes serving posts. Finally, the HTTPS server is started on port 3000, and an error-handling middleware logs errors and returns a generic response to enhance security.
+We used Cache-Control headers in a bid to obtain improved performance with security:
+Public caching of the /posts route facilitates non-sensitive data to be cached for fast retrieval and shared among users but for a limited amount of time.
+Private caching of individual posts (/posts/:id) facilitates sensitive information from not being shared among users or inaccessibly cached. This method of caching reduces load times and improves user experience with sensitive data kept secure.
+
+
+Summary:
+This code creates a secure HTTPS server using SSL, security headers, caching, and error handling. It initially sets up SSL certificates with a self-signed certificate in development to allow secure communication. It then configures security headers using the Helmet middleware, imposing policies like Content Security Policy (CSP) to prevent XSS, disabling content embedding to prevent clickjacking, and hiding server information. A strategy of caching is applied for some routes, improving performance by storing responses for a time interval while allowing revalidation. The server defines a root route so that it is running securely and has caching defined for routes for posts. Finally, the HTTPS server listens on port 3000, and an error-handling middleware logs and returns a random response to improve security.
+
 
 
 Setup Instructions
