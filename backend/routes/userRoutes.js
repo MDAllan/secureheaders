@@ -1,28 +1,27 @@
 const express = require('express');
 const router = express.Router();
+const User = require('../models/User'); 
+const { isAuthenticated } = require('../utils/auth');  //authentication middleware
 
-// User registration route
-router.post('/register', (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required' });
+//route to get the authenticated user's profile
+router.get('/profile', isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');  //exclude password field
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching user profile', error: err });
   }
-
-  // Simulate user registration logic
-  res.status(201).json({ message: 'User registered successfully' });
 });
 
-// User login route
-router.post('/login', (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required' });
+// Route to update user profile
+router.put('/profile', isAuthenticated, async (req, res) => {
+  const { username, email } = req.body;
+  try {
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, { username, email }, { new: true });
+    res.status(200).json({ message: 'Profile updated successfully!', user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating profile', error: err });
   }
-
-  // Simulate user login logic
-  res.status(200).json({ message: 'User logged in successfully' });
 });
 
 module.exports = router;
