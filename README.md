@@ -5,13 +5,13 @@ We used OpenSSL to generate self-signed certificates because it suited our use d
 
 
 How do the headers you chose to implement enhance your app’s security? Document your rationale.
-(Helmet): By using Helmet, we added some essential security headers to the server to make it more secure. The headers that we include are:
-Content Security Policy (CSP): Protects against XSS attacks by specifying what content is allowed to be loaded. X-Frame-Options: Protects against clickjacking by restricting how the site may be framed.
-Strict-Transport-Security (HSTS): Ensures that only secure HTTPS connections are established. I also employed other headers like hidePoweredBy, noSniff, xssFilter, and referrerPolicy to ensure the security was even tighter.
+Through Helmet, we added some base security headers to the server that further secure the server. These headers that are added are: Content Security Policy, this header does not allow a Cross-Site Scripting (XSS) attack because through this header we define which content sources the browser should fetch for us. Hence, this is the header through which your website is prevented from malicious content as well as inline scripts. X-Frame-Options, which prevents clickjacking by not permitting your site from being framed on another website. If configured as DENY, your application won't be rendered in a frame, irrespective of the origin of the request. X-Powered-By, which hides the X-Powered-By header that typically names the server technology being utilized (e.g., Express). It is helpful to reduce information leakage about your server configuration. XSS Protection enables the browser's XSS filter. It provides limited protection against reflected XSS attacks. This stops malicious scripts from executing in the user's browser. Strict-Transport-Security (HSTS) compels browsers to communicate with your site only over HTTPS, so man-in-the-middle attacks become less possible. This header tells browsers to always access your site over HTTPS in the future, not insecure HTTP. Referrer-Policy, which specifies the level of referrer information (such as the URL of a page that is linked to another) that is sent with requests. It is used for keeping the privacy of users secure by not sending sensitive information in the referrer header across various sites.
+
+
 
 
 What was the most challenging part of setting up HTTPS and Helmet? Document how you resolved any issues.
-Getting the SSL certificates configured correctly and being read by the server was one of the most challenging hurdles throughout this project. First, the path to the certificate and private key file was a problem, and this caused the server not to function at start-up. To debug this entailed verifying correct placement of files and adjusting paths accordingly. Also, browser warnings of security risk followed as an aftermath of being run with a self-signed certificate, which was expected but did require manually approving the certificate via the browser. For Helmet, it was tricky to tune Content Security Policy (CSP) because blocking inline scripts entirely resulted in some of the features breaking. To remedy this, we allowed 'unsafe-inline' for scripts with the intention of moving to stricter in production.
+The most challenging part for us was getting the SSL certificates configured correctly and being read by the server. First, the path to the certificate and private key file was a problem, and this caused the server not to function at start-up. To debug this entailed verifying correct placement of files and adjusting paths accordingly. Also, browser warnings of security risk followed as an aftermath of being run with a self-signed certificate, which was expected but did require manually approving the certificate via the browser. For Helmet, it was tricky to tune Content Security Policy (CSP) because blocking inline scripts entirely resulted in some of the features breaking. To remedy this, we allowed 'unsafe-inline' for scripts with the intention of moving to stricter in production.
 
 
 Document your caching strategy choices and how they address performance and security needs. What trade-offs did you make?
@@ -25,7 +25,11 @@ This code creates a secure HTTPS server using SSL, security headers, caching, an
 
 
 
+
+
+
 Setup Instructions
+
 Install Dependencies
 Ensure you have Node.js installed, then install the necessary packages:
 sh
@@ -51,38 +55,48 @@ Access it at https://localhost:3000 (accept the self-signed certificate in your 
 
 
 SSL Configuration
-We used OpenSSL to generate a self-signed certificate for local development. The server reads the SSL key and certificate files from the filesystem and passes them to the https.createServer() method.
-For production, a trusted Certificate Authority (e.g., Let's Encrypt) should be used to avoid browser security warnings.
+
+A self-signed certificate for local development was generated using OpenSSL. The server reads the SSL key and certificate files from the filesystem and passes them to the https.createServer() method.
+In production, a trusted Certificate Authority (e.g., Let's Encrypt) must be used to avoid browser security warnings.
 Security Headers (Helmet Middleware)
-Helmet was implemented to strengthen security by configuring the following headers:
+Helmet was configured to tighten security by setting the following headers:
 Content Security Policy (CSP): Restricts content sources to prevent XSS attacks.
-X-Frame-Options: Blocks embedding in iframes to prevent clickjacking.
+X-Frame-Options: Disallows embedding in iframes to prevent clickjacking.
 Strict-Transport-Security (HSTS): Forces HTTPS connections.
-Hide X-Powered-By: Prevents information leakage about the server.
-XSS Protection & NoSniff: Helps mitigate cross-site scripting and MIME-type sniffing attacks.
+Hide X-Powered-By: Prevents information disclosure about the server.
+XSS Protection & NoSniff: Helps prevent cross-site scripting and MIME-type sniffing attacks.
 
 
 Caching Strategies
-We implemented Cache-Control headers for specific routes:
+
+We implemented Cache-Control headers on specific routes:
+
 Static Content & Public Data (/posts route):
-Cached for 10 minutes (max-age=600), allowing revalidation after 2 minutes.
+Cached for 10 minutes (max-age=600) with revalidation possible after 2 minutes.
 Improves performance for frequently accessed content.
+
 Private Data (/posts/:id route):
-Cached privately for 5 minutes (max-age=300), allowing revalidation after 1 minute.
-Ensures sensitive content isn't shared across users.
+Privately cached for 5 minutes (max-age=300), revalidating after 1 minute.
+Ensures sensitive content isn't accidentally shared among users.
 Static Files (Global Middleware):
-Cached for 5 minutes (max-age=300), revalidating after 1 minute.
-Speeds up content delivery while keeping the cache fresh.
+Speeds up content delivery while ensuring a fresh cache.
+
+
+
+
 
 
 Lessons Learned
+
 SSL Configuration Challenges:
-Initially faced file path errors when loading SSL certificates. Resolved by checking absolute paths.
-Browser security warnings due to self-signed certificates required manual acceptance.
+Initial file path problems loading SSL certificates. Resolved by ensuring absolute paths.
+Self-signed certificates caused browser security warnings that had to be manually accepted.
+
 Helmet CSP Adjustments:
-Strict CSP policies initially broke inline scripts. Allowed 'unsafe-inline' temporarily but plan to remove it in production.
+Strict CSP policies disabled inline scripts firsthand. Allowed 'unsafe-inline' temporarily but planning to exclude it in production.
+
 Caching Considerations:
-Balanced performance with security by caching non-sensitive data longer while keeping private data secure.
-This project improved our understanding of secure server configurations, HTTPS enforcement, and performance optimization through caching.
+Struck a balance between security and performance by caching non sensitive data for longer periods without sacrificing private data security.
+We gained more insight into secure server configurations, HTTPS enforcement, and performance optimization through the use of caching in this project.
 
 
