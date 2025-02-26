@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); //already installed argon2 consider whether to use that instead or not
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');  // User model
 
 // User registration route
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role = 'user' } = req.body;
   const existingUser = await User.findOne({ username });
 
   if (existingUser) {
@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ username, password: hashedPassword });
+  const newUser = new User({ username, password: hashedPassword, role });
 
   try {
     await newUser.save();
