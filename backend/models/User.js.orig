@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 module.exports = mongoose.model('User', UserSchema);
 
 const express = require("express");
@@ -25,3 +25,25 @@ router.post("/register", async (req, res) => {
 });
 
 module.exports = router;
+=======
+const mongoose = require('mongoose');
+
+const UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],  // Define allowed roles
+    default: 'user'
+  }
+});
+
+module.exports = mongoose.model('User', UserSchema);
+>>>>>>> 226288caffabf6331141cc615a9422c2a944588a
