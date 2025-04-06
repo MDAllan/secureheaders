@@ -16,6 +16,9 @@ const validator = require('validator');
 const escapeHtml = require('escape-html');
 const crypto = require('crypto');
 const lusca = require('lusca');
+const app = express();
+// Mock database (would be replaced with a real database)
+const database = {};
 
 //testing
 const xss = require("xss");
@@ -24,13 +27,6 @@ app.post("/test-xss", (req, res) => {
   const safeInput = xss(req.body.input);
   res.send(`Escaped input: ${safeInput}`);
 });
-
-
-// Mock database (would be replaced with a real database)
-const database = {};
-
-// Initialize Express
-const app = express();
 
 // EJS setup
 app.set('view engine', 'ejs');
@@ -97,7 +93,7 @@ app.use((req, res, next) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.DB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
