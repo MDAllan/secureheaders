@@ -54,7 +54,7 @@ router.post("/login", loginLimiter, async (req, res) => {
       path: "/auth/refresh"
     });
 
-    res.json({ accessToken });
+    res.json({ token: accessToken });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ msg: "Server error" });

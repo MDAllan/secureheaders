@@ -7,7 +7,7 @@ const loginSection = document.getElementById("login-section");
 const logoutSection = document.getElementById("logout-section");
 const ssoSection = document.getElementById("sso-section");
 
-const API_URL = "http://localhost:5000/api/auth"; // Update with your API URL
+const API_URL = "https://localhost:3000/api/auth";
 
 // 1. Handle Login
 loginForm.addEventListener("submit", async (e) => {
