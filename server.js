@@ -15,6 +15,10 @@ const path = require("path");
 // Initialize Express
 const app = express();
 
+//ejs setup
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Security Middleware
 app.use(helmetConfig);
 app.use(cookieParser());
@@ -36,6 +40,14 @@ app.use(
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Middleware to check if user is authenticated
+const requireAuth = (req, res, next) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.redirect('/api/auth/login'); // Adjust if your login route is different
+  }
+  next();
+};
 
 // Rate Limiting (Prevents brute-force attacks)
 const loginLimiter = rateLimit({
@@ -65,6 +77,27 @@ const postRoutes = require('./routes/postsRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
+
+// Dashboard route
+app.get('/dashboard', requireAuth, (req, res) => {
+  const user = {
+    name: req.user.displayName || "Unknown User",
+    email: req.user.emails?.[0]?.value || "Not provided"
+  };
+  res.render('dashboard', { user });
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+  req.logout(err => {
+    if (err) {
+      console.error('Logout Error:', err);
+    }
+    req.session.destroy(() => {
+      res.redirect('/');
+    });
+  });
+});
 
 // Server Status Route
 app.get('/', (req, res) => {
