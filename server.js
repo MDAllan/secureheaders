@@ -15,6 +15,7 @@ const { body, validationResult } = require('express-validator');
 const validator = require('validator');
 const escapeHtml = require('escape-html');
 const crypto = require('crypto');
+const lusca = require('lusca');
 
 // Mock database (would be replaced with a real database)
 const database = {};
@@ -40,9 +41,25 @@ app.use(
     secret: process.env.SESSION_SECRET || 'default_secret',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true, httpOnly: true },
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true
+    },
   })
 );
+
+// CSRF Protection
+app.use(
+  lusca.csrf({
+    angular: false,
+  })
+);
+
+// Make CSRF token available to all views
+app.use((req, res, next) => {
+  res.locals._csrf = req.csrfToken();
+  next();
+});
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -87,10 +104,12 @@ app.use('/api/posts', postRoutes);
 
 // Encryption helper function
 const encrypt = (text) => {
-  const cipher = crypto.createCipher('aes-256-cbc', process.env.SECRET_KEY || 'default_secret');
+  const key = crypto.scryptSync(process.env.SECRET_KEY || 'default_secret', 'salt', 32);
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  return encrypted;
+  return iv.toString('hex') + ':' + encrypted;
 };
 
 // Dashboard route
