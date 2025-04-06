@@ -17,6 +17,15 @@ const escapeHtml = require('escape-html');
 const crypto = require('crypto');
 const lusca = require('lusca');
 
+//testing
+const xss = require("xss");
+
+app.post("/test-xss", (req, res) => {
+  const safeInput = xss(req.body.input);
+  res.send(`Escaped input: ${safeInput}`);
+});
+
+
 // Mock database (would be replaced with a real database)
 const database = {};
 
