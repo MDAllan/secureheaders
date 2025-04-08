@@ -15,7 +15,8 @@ const { body, validationResult } = require('express-validator');
 const validator = require('validator');
 const escapeHtml = require('escape-html');
 const crypto = require('crypto');
-const lusca = require('lusca');
+// Commenting out CSRF Protection (lusca)
+const lusca = require('lusca'); 
 const app = express();
 // Mock database (would be replaced with a real database)
 const database = {};
@@ -53,18 +54,18 @@ app.use(
   })
 );
 
-// CSRF Protection
-app.use(
-  lusca.csrf({
-    angular: false,
-  })
-);
+// Commenting out CSRF Protection
+// app.use(
+//   lusca.csrf({
+//     angular: false,
+//   })
+// );
 
-// Make CSRF token available to all views
-app.use((req, res, next) => {
-  res.locals._csrf = req.csrfToken();
-  next();
-});
+// Commenting out the middleware for CSRF token availability
+// app.use((req, res, next) => {
+//   res.locals._csrf = req.csrfToken();
+//   next();
+// });
 
 // Initialize Passport
 app.use(passport.initialize());
