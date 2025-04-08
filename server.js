@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
 const helmetConfig = require('./config/helmetConfig');
+const sslOptions = require('./config/sslConfig');
 const rateLimit = require('express-rate-limit');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const path = require('path');
@@ -203,12 +204,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
-
-// SSL Certificate and Private Key Configuration
-const sslOptions = {
-  key: fs.readFileSync('certs/private.key'),  // Replace with the correct path to your private key
-  cert: fs.readFileSync('certs/certificate.crt')  // Replace with the correct path to your SSL certificate
-};
 
 // Start HTTPS Server
 https.createServer(sslOptions, app).listen(3000, () => {
