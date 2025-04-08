@@ -21,6 +21,8 @@ const app = express();
 // Mock database (would be replaced with a real database)
 const database = {};
 
+app.use(express.static(path.join(__dirname, "public")));
+
 //testing
 const xss = require("xss");
 

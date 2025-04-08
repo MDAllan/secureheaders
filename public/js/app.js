@@ -9,6 +9,18 @@ const ssoSection = document.getElementById("sso-section");
 
 const API_URL = "https://localhost:3000/api/auth";
 
+ // Show the Signup Form and Hide the Login Form
+ document.getElementById('show-signup').addEventListener('click', function() {
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('signup-section').style.display = 'block';
+});
+
+// Show the Login Form and Hide the Signup Form
+document.getElementById('show-login').addEventListener('click', function() {
+  document.getElementById('signup-section').style.display = 'none';
+  document.getElementById('login-section').style.display = 'block';
+});
+
 // 1. Handle Login
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -86,3 +98,43 @@ window.addEventListener("load", () => {
 document.getElementById("google-login-btn").addEventListener("click", () => {
   window.location.href = `${API_URL}/google`; // Redirect to Google OAuth
 });
+
+// Select Signup Form Elements
+const signupForm = document.getElementById("signup-form");
+const signupName = document.getElementById("signup-name");
+const signupEmail = document.getElementById("signup-email");
+const signupPassword = document.getElementById("signup-password");
+
+// 5. Handle Sign-Up
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = signupName.value;
+  const email = signupEmail.value;
+  const password = signupPassword.value;
+
+  try {
+    const res = await fetch(`${API_URL}/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, email, password }),
+      credentials: "include", // This ensures cookies are sent with the request
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Signup successful! You can now log in.");
+      // Optionally, redirect to the login page or log in automatically
+      document.getElementById('signup-section').style.display = 'none';
+      document.getElementById('login-section').style.display = 'block';
+    } else {
+      alert(data.msg); // Show error message
+    }
+  } catch (err) {
+    console.error("Signup failed:", err);
+  }
+});
+
