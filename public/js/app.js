@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = signupPassword.value;
 
       try {
-        const res = await fetch("https://yourdomain.com/api/auth/register", {
+        const res = await fetch(`${API_URL}/register`, {  // <-- Use the API_URL constant here
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -143,4 +143,4 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     console.error("Signup form not found in DOM");
   }
-});
+})

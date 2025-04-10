@@ -11,35 +11,34 @@ const crypto = require('crypto');
 const path = require('path');
 const router = express.Router();
 
-// Secret key for encryption (ensure it's stored securely, e.g., in environment variables)
 const encryptionKey = process.env.BIO_ENCRYPTION_KEY; // Store this securely in your .env file
 
-// Profile Update Route (with sanitization and encryption)
-router.post('/updateProfile', [
+// 🔐 Profile Update Route (with sanitization, encryption, and JWT protection)
+router.post('/updateProfile', verifyToken, [
   body('name').trim().isAlpha().isLength({ min: 3, max: 50 }).withMessage('Name must be 3-50 alphabetic characters'),
   body('email').isEmail().normalizeEmail().withMessage('Invalid email format'),
   body('bio').isLength({ max: 500 }).matches(/^[A-Za-z0-9\s.,!?()&]*$/).withMessage('Bio can only contain alphanumeric characters and punctuation'),
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ msg: errors.array()[0].msg });  // Send first validation error
+    return res.status(400).json({ msg: errors.array()[0].msg });
   }
 
   const { name, email, bio } = req.body;
 
   // Encrypt sensitive data before saving
-  const iv = crypto.randomBytes(16); // Use a random IV for each encryption
+  const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(encryptionKey, 'hex'), iv);
   let encryptedBio = cipher.update(bio, 'utf8', 'hex');
   encryptedBio += cipher.final('hex');
 
   try {
     const updatedUser = await User.findOneAndUpdate(
-      { email: req.user.email }, // Assuming email is available in req.user from authentication
+      { email: req.user.email },
       { name, email, bio: encryptedBio },
       { new: true }
     );
-    
+
     res.json({ success: true, msg: 'Profile updated successfully', user: updatedUser });
   } catch (err) {
     console.error(err);
@@ -51,7 +50,6 @@ router.post('/updateProfile', [
 router.get("/signup", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/signup.html"));
 });
-
 
 // Register User
 router.post(
@@ -72,28 +70,23 @@ router.post(
       .matches(/[0-9]/).withMessage("Password must contain a number")
       .matches(/[A-Z]/).withMessage("Password must contain an uppercase letter")
       .matches(/[a-z]/).withMessage("Password must contain a lowercase letter"),
-
-    // You can add other validation for things like passwords or username uniqueness here
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ msg: errors.array()[0].msg });  // Send the first validation error
+      return res.status(400).json({ msg: errors.array()[0].msg });
     }
 
     const { username, email, password } = req.body;
 
     try {
-      // Check if user already exists
       const userExists = await User.findOne({ email });
       if (userExists) {
         return res.status(400).json({ msg: "Email already registered!" });
       }
 
-      // Hash password before saving
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Create and save the new user
       const newUser = new User({
         username,
         email,
@@ -113,22 +106,20 @@ router.post(
   }
 );
 
-
 // Login User & Issue Tokens
 router.post("/login", loginLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const { password } = req.body;
     const user = await User.findOne({ email });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ msg: "Invalid credentials" });
     }
 
-    // Generate access & refresh tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Set refresh token as HTTP-only cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
@@ -170,7 +161,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-    res.redirect("/dashboard"); // Redirect after successful login
+    res.redirect("/dashboard");
   }
 );
 
